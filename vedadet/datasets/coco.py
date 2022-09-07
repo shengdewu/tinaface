@@ -5,9 +5,9 @@ import logging
 import numpy as np
 import os.path as osp
 import tempfile
-from pycocotools.coco import COCO
-from pycocotools.cocoeval import COCOeval
-from terminaltables import AsciiTable
+# from pycocotools.coco import COCO
+# from pycocotools.cocoeval import COCOeval
+# from terminaltables import AsciiTable
 
 import vedacore.fileio as fileio
 from vedacore.misc import print_log, registry

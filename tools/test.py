@@ -67,7 +67,7 @@ def main():
         print(f'\nwriting results to {args.out}')
         dump(results, args.out)
 
-    data_loader.dataset.evaluate(results)
+    data_loader.dataset.evaluate(results, '/mnt/sda1/face.test')
 
 
 if __name__ == '__main__':

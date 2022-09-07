@@ -1,17 +1,17 @@
 # 1. data
 dataset_type = 'WIDERFaceDataset'
-data_root = 'data/WIDERFace/'
+data_root = '/home/shengdewu/data/face.data/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[1, 1, 1], to_rgb=True)
 size_divisor = 32
 
 data = dict(
-    samples_per_gpu=4,
-    workers_per_gpu=2,
+    samples_per_gpu=1,
+    workers_per_gpu=1,
     train=dict(
         typename=dataset_type,
-        ann_file=data_root + 'WIDER_train/train.txt',
-        img_prefix=data_root + 'WIDER_train/',
+        ann_file=data_root + 'WIDER_train/test.txt',
+        img_prefix=data_root + 'WIDER_train',
         min_size=1,
         offset=0,
         pipeline=[
@@ -182,7 +182,7 @@ hooks = [
         min_lr_ratio=1e-2),
     dict(typename='EvalHook'),
     dict(typename='SnapshotHook', interval=1),
-    dict(typename='LoggerHook', interval=100)
+    dict(typename='LoggerHook', interval=1)
 ]
 
 # 5. work modes
@@ -191,7 +191,7 @@ max_epochs = 630
 
 # 6. checkpoint
 weights = dict(
-    filepath='torchvision://resnet50',
+    filepath='/home/shengdewu/.cache/torch/hub/checkpoints/resnet50-0676ba61.pth',
     prefix='backbone')
 # optimizer = dict(filepath='workdir/retinanet_mini/epoch_3_optim.pth')
 # meta = dict(filepath='workdir/retinanet_mini/epoch_3_meta.pth')

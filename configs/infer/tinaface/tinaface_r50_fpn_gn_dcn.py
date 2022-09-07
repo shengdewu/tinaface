@@ -1,23 +1,32 @@
 # 1. data
+dataset_type = 'TestDataset'
+data_root = '/mnt/sdb/error.collection/identify.evaluate/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[1, 1, 1], to_rgb=True)
 size_divisor = 32
 
-data_pipeline = [
-    dict(typename='LoadImageFromFile'),
-    dict(
-        typename='MultiScaleFlipAug',
-        img_scale=(1100, 1650),
-        flip=False,
-        transforms=[
-            dict(typename='Resize', keep_ratio=True),
-            dict(typename='RandomFlip', flip_ratio=0.0),
-            dict(typename='Normalize', **img_norm_cfg),
-            dict(typename='Pad', size_divisor=size_divisor, pad_val=0),
-            dict(typename='ImageToTensor', keys=['img']),
-            dict(typename='Collect', keys=['img'])
-        ])
-]
+data = dict(
+    samples_per_gpu=4,
+    workers_per_gpu=12,
+    val=dict(
+        typename=dataset_type,
+        img_prefix=data_root + 'img/',
+        max_num=-1,
+        pipeline=[
+            dict(typename='LoadImageFromFile'),
+            dict(
+                typename='MultiScaleFlipAug',
+                img_scale=(1100, 1650),
+                flip=False,
+                transforms=[
+                    dict(typename='Resize', keep_ratio=True),
+                    dict(typename='Normalize', **img_norm_cfg),
+                    dict(typename='Pad', size_divisor=32, pad_val=0),
+                    dict(typename='ImageToTensor', keys=['img']),
+                    dict(typename='Collect', keys=['img'])
+                ])
+        ]),
+)
 
 # 2. model
 num_classes = 1
@@ -66,7 +75,7 @@ model = dict(
         norm_cfg=dict(typename='GN', num_groups=32, requires_grad=True),
         use_sigmoid=use_sigmoid))
 
-# 3. engine
+# 3. engines
 meshgrid = dict(
     typename='BBoxAnchorMeshGrid',
     strides=strides,
@@ -82,29 +91,23 @@ bbox_coder = dict(
     target_means=[.0, .0, .0, .0],
     target_stds=[0.1, 0.1, 0.2, 0.2])
 
-## infer engine
-infer_engine = dict(
-    typename='InferEngine',
+## 3.2 val engine
+val_engine = dict(
+    typename='ValEngine',
     model=model,
     meshgrid=meshgrid,
     converter=dict(
         typename='IoUBBoxAnchorConverter',
         num_classes=num_classes,
         bbox_coder=bbox_coder,
-        nms_pre=10000,
+        nms_pre=-1,
         use_sigmoid=use_sigmoid),
     num_classes=num_classes,
     test_cfg=dict(
         min_bbox_size=0,
-        score_thr=0.4,
-        nms=dict(
-            typename='nms',
-            iou_thr=0.45),
-        max_per_img=300),
-    use_sigmoid=use_sigmoid)
+        score_thr=0.01,
+        nms=dict(typename='lb_nms', iou_thr=0.45),
+        max_per_img=-1),
+    use_sigmoid=use_sigmoid,
+    eval_metric=None)
 
-# 4. weights
-weights = dict(filepath='your/weight/file/path')
-
-# 5. show
-class_names = ('face', )
