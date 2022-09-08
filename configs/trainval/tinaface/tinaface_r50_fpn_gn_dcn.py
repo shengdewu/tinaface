@@ -1,17 +1,17 @@
 # 1. data
-dataset_type = 'WIDERFaceDataset'
-data_root = '/home/shengdewu/data/face.data/'
+dataset_type = 'XTFaceDataset'
+data_root = '/home/shengdewu/data/face.data/xintu/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[1, 1, 1], to_rgb=True)
 size_divisor = 32
 
 data = dict(
-    samples_per_gpu=4,
-    workers_per_gpu=2,
+    samples_per_gpu=8,
+    workers_per_gpu=10,
     train=dict(
         typename=dataset_type,
-        ann_file=data_root + 'WIDER_train/train.txt',
-        img_prefix=data_root + 'WIDER_train/',
+        ann_file=data_root + 'train.txt',
+        img_prefix=data_root,
         min_size=1,
         offset=0,
         pipeline=[
@@ -34,8 +34,8 @@ data = dict(
         ]),
     val=dict(
         typename=dataset_type,
-        ann_file=data_root + 'WIDER_val/val.txt',
-        img_prefix=data_root + 'WIDER_val/',
+        ann_file=data_root + 'val.txt',
+        img_prefix=data_root,
         min_size=1,
         offset=0,
         pipeline=[
@@ -188,12 +188,17 @@ hooks = [
 
 # 5. work modes
 modes = ['train']#, 'val']
-max_epochs = 630
+max_epochs = 100
 
 # 6. checkpoint
+# weights = dict(
+#     filepath='/home/shengdewu/.cache/torch/hub/checkpoints/resnet50-0676ba61.pth',
+#     prefix='backbone')
+
 weights = dict(
-    filepath='/home/shengdewu/.cache/torch/hub/checkpoints/resnet50-0676ba61.pth',
-    prefix='backbone')
+    filepath='/mnt/sda1/train.output/face.detect/tinaface.base/epoch_100_weights.pth')
+
+workdir = '/mnt/sda1/train.output/face.detect/tinaface'
 # optimizer = dict(filepath='workdir/retinanet_mini/epoch_3_optim.pth')
 # meta = dict(filepath='workdir/retinanet_mini/epoch_3_meta.pth')
 
@@ -201,3 +206,4 @@ weights = dict(
 seed = 1234
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
+
