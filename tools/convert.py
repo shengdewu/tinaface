@@ -128,9 +128,9 @@ def convertXTAnnotations(root_path):
     # /mnt/sdb/data.set/face_and_age_gender
     # Annotations
 
+    max_path = ''
+    img_size = dict()
     for sub_dir in ['part01', 'part02', 'part03']:
-        if sub_dir != 'part02':
-            continue
 
         target_path = os.path.join(root_path, 'Annotations', sub_dir)
         os.makedirs(target_path, exist_ok=True)
@@ -175,17 +175,42 @@ def convertXTAnnotations(root_path):
                 w = shape['width']
                 h = shape['height']
 
+                import math
+                size = int(math.sqrt(w * h)) // 100
+                if img_size.get(size, None) is None:
+                    img_size[size] = list()
+                img_size[size].append((w, h))
+
+                continue
+
                 age_seg = female['年龄']
                 age = female['识别年龄']
                 gender = female['性别']
 
                 ann.getroot().append(createObjectPascalVocTreeWithAgeGender(str(x), str(y), str(x + w), str(y + h), age_seg, gender, age).getroot())
 
-            if basename.find('JPG') != -1:
-                annFilename = os.path.join(target_path, basename.replace('.JPG', '.xml'))
-            else:
-                annFilename = os.path.join(target_path, basename.replace('.jpg', '.xml'))
-            ann.write(annFilename)
+            # if basename.find('JPG') != -1:
+            #     annFilename = os.path.join(target_path, basename.replace('.JPG', '.xml'))
+            # else:
+            #     annFilename = os.path.join(target_path, basename.replace('.jpg', '.xml'))
+            # ann.write(annFilename)
+    import math
+    img_size_sorted = sorted(img_size.items(), key=lambda kv:(len(kv[1])), reverse=True)
+    with open('/mnt/sdb/data.set/face_and_age_gender/face.size.txt', mode='w') as wh:
+        for k, size in img_size_sorted:
+            wh.write('size = {}*100 cnt={}\n'.format(k, len(size)))
+            idx = 0
+            wh.write('  ')
+            for s in size:
+                wh.write('{} '.format(s))
+                idx += 1
+                if idx % 10 == 0:
+                    wh.write('\n  ')
+            wh.write('\n')
+
+
+
+
 
 
 if __name__ == '__main__':
