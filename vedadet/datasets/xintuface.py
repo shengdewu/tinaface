@@ -28,7 +28,6 @@ class XTFaceDataset(XMLDataset):
         img_ids = fileio.list_from_file(ann_file)
         self.img_ids = img_ids
         for img_id in img_ids:
-            filename = f'{img_id}.jpg'
             xml_path = osp.join(self.img_prefix, 'Annotations',
                                 f'{img_id}.xml')
             tree = ET.parse(xml_path)
@@ -37,10 +36,11 @@ class XTFaceDataset(XMLDataset):
             width = int(size.find('width').text)
             height = int(size.find('height').text)
             folder = root.find('folder').text
+            filename = root.find('filename').text
             data_infos.append(
                 dict(
                     id=img_id,
-                    filename=filename,
+                    filename=osp.join(folder, filename),
                     width=width,
                     height=height))
 
