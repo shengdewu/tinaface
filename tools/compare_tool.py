@@ -149,7 +149,7 @@ class CompareOne(CompareBase):
 
 if __name__ == '__main__':
     base_path = '/mnt/sdb/error.collection/identify.evaluate/face'
-    compare_path = ['/mnt/sda1/face.test/tinaface']
+    compare_path = ['/mnt/sda1/face.test/tinaface.base', '/mnt/sda1/face.test/tinaface']
     out_path = '/mnt/sda1/face.test/tinaface.compare'
     compare_cls = CompareOne()
     compare_cls.compare(base_path=base_path, compare_paths=compare_path, out_path=out_path)

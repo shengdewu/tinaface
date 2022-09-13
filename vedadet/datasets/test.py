@@ -12,6 +12,8 @@ from .pipelines import Compose
 
 import cv2
 
+import json
+
 
 @registry.register_module('dataset')
 class TestDataset(Dataset):
@@ -196,11 +198,18 @@ class TestDataset(Dataset):
                  results,
                  out_put=''):
 
+        json_path = os.path.join(out_put, 'json')
+        os.makedirs(json_path, exist_ok=True)
+
         for idx in range(len(self)):
             img_name = self.data_infos[idx]
             img = cv2.imread(os.path.join(self.img_prefix, img_name['filename']))
 
             result = results[idx]
+
+            with open(os.path.join(json_path, '{}.json'.format(img_name)), mode='w') as w:
+                json.dump(result, w)
+
             for label in range(len(result)):
                 bboxes = result[label]
                 for i in range(bboxes.shape[0]):

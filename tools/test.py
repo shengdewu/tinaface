@@ -1,6 +1,11 @@
 import argparse
 
 import torch
+import sys
+import os
+
+parent_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(parent_dir)
 
 from vedacore.fileio import dump
 from vedacore.misc import Config, ProgressBar, load_weights
@@ -14,7 +19,7 @@ def parse_args():
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
     parser.add_argument('--out', help='output result file in pickle format')
-
+    parser.add_argument('--save', help='the result of image')
     args = parser.parse_args()
     return args
 
@@ -67,7 +72,8 @@ def main():
         print(f'\nwriting results to {args.out}')
         dump(results, args.out)
 
-    data_loader.dataset.evaluate(results, '/mnt/sda1/face.test')
+    os.makedirs(args.save, exist_ok=True)
+    data_loader.dataset.evaluate(results, args.save)
 
 
 if __name__ == '__main__':
