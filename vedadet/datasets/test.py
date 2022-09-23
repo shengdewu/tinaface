@@ -205,13 +205,12 @@ class TestDataset(Dataset):
             img_name = self.data_infos[idx]
             img = cv2.imread(os.path.join(self.img_prefix, img_name['filename']))
 
+            boxes_list = list()
+
             result = results[idx]
-
-            with open(os.path.join(json_path, '{}.json'.format(img_name)), mode='w') as w:
-                json.dump(result, w)
-
             for label in range(len(result)):
                 bboxes = result[label]
+                one_boxes = list()
                 for i in range(bboxes.shape[0]):
                     bbox = bboxes[i].tolist()[:4]
                     score = float(bboxes[i][4])
@@ -220,5 +219,11 @@ class TestDataset(Dataset):
                     poly_box = [int(p + 0.5) for p in bbox]
                     cv2.rectangle(img, (poly_box[0], poly_box[1]), (poly_box[2], poly_box[3]), color=[0,255,0], thickness=8)
                     cv2.putText(img, '{}'.format(round(score,3)), (int(bbox[0]), int(bbox[1] - 10)), cv2.FONT_HERSHEY_SIMPLEX, 4, [255,0,0], thickness=4)
+                    one_boxes.append((poly_box[0], poly_box[1], poly_box[2], poly_box[3]))
+                boxes_list.append(one_boxes)
+
             cv2.imwrite('{}/{}'.format(out_put, img_name['filename']), img)
+
+            with open(os.path.join(json_path, '{}.json'.format(img_name['filename'])), mode='w') as wh:
+                json.dump(boxes_list, wh)  
         return

@@ -1,16 +1,16 @@
 # 1. data
-dataset_type = 'WIDERFaceDataset'
+dataset_type = 'XTFaceDataset'
 data_root = '/home/shengdewu/data/face.data/xintu/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[1, 1, 1], to_rgb=True)
 size_divisor = 32
 
 data = dict(
-    samples_per_gpu=1,
-    workers_per_gpu=1,
+    samples_per_gpu=8,
+    workers_per_gpu=10,
     train=dict(
         typename=dataset_type,
-        ann_file=data_root + 'test.txt',
+        ann_file=data_root + 'train.txt',
         img_prefix=data_root,
         min_size=1,
         offset=0,
@@ -181,13 +181,13 @@ hooks = [
         warmup_ratio=1e-1,
         min_lr_ratio=1e-2),
     dict(typename='EvalHook'),
-    dict(typename='SnapshotHook', interval=1),
-    dict(typename='LoggerHook', interval=1)
+    dict(typename='SnapshotHook', interval=50),
+    dict(typename='LoggerHook', interval=50)
 ]
 
 # 5. work modes
 modes = ['train']#, 'val']
-max_epochs = 630
+max_epochs = 100
 
 # 6. checkpoint
 # weights = dict(
@@ -195,8 +195,9 @@ max_epochs = 630
 #     prefix='backbone')
 
 weights = dict(
-    filepath='/mnt/sda1/train.output/face.detect/tinaface/epoch_100_weights.pth',
-    prefix='backbone')
+    filepath='/mnt/sda1/train.output/face.detect/tinaface.no_dcn.base/epoch_100_weights.pth')
+
+workdir = '/mnt/sda1/train.output/face.detect/tinaface.no_dcn'
 
 # optimizer = dict(filepath='workdir/retinanet_mini/epoch_3_optim.pth')
 # meta = dict(filepath='workdir/retinanet_mini/epoch_3_meta.pth')
