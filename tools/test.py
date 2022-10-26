@@ -12,6 +12,8 @@ from vedacore.misc import Config, ProgressBar, load_weights
 from vedacore.parallel import MMDataParallel
 from vedadet.datasets import build_dataloader, build_dataset
 from vedadet.engines import build_engine
+import random
+from torch_script.model import ScriptMode
 
 
 def parse_args():
@@ -24,14 +26,19 @@ def parse_args():
     return args
 
 
-def prepare(cfg, checkpoint):
+def prepare(cfg, checkpoint, script_path=''):
 
-    engine = build_engine(cfg.val_engine)
-    load_weights(engine.model, checkpoint, map_location='cpu')
+    if len(script_path) > 0:
+        engine = ScriptMode(cfg.val_engine.model, checkpoint, script_path)
+    else:
+        engine = build_engine(cfg.val_engine)
+        load_weights(engine.model, checkpoint, map_location='cpu')
 
-    device = torch.cuda.current_device()
-    engine = MMDataParallel(
-        engine.to(device), device_ids=[torch.cuda.current_device()])
+        device = torch.cuda.current_device()
+        engine = MMDataParallel(
+            engine.to(device), device_ids=[torch.cuda.current_device()])
+
+        engine.eval()
 
     dataset = build_dataset(cfg.data.val, dict(test_mode=True))
     dataloader = build_dataloader(dataset, 1, 1, dist=False, shuffle=False)
@@ -40,17 +47,17 @@ def prepare(cfg, checkpoint):
 
 
 def test(engine, data_loader):
-    engine.eval()
     results = []
     dataset = data_loader.dataset
     prog_bar = ProgressBar(len(dataset))
+
     for i, data in enumerate(data_loader):
 
         with torch.no_grad():
             result = engine(data)[0]
 
         results.append(result)
-        batch_size = len(data['img_metas'][0].data)
+        batch_size = len(data['img_metas'].data) if not isinstance(data['img_metas'], list) else len(data['img_metas'][0].data)
         for _ in range(batch_size):
             prog_bar.update()
     return results
@@ -64,7 +71,7 @@ def main():
     if args.out is not None and not args.out.endswith(('.pkl', '.pickle')):
         raise ValueError('The output file must be a pkl file.')
 
-    engine, data_loader = prepare(cfg, args.checkpoint)
+    engine, data_loader = prepare(cfg, args.checkpoint, args.save)
 
     results = test(engine, data_loader)
 
