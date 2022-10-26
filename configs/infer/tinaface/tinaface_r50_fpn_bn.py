@@ -14,17 +14,26 @@ data = dict(
         max_num=-1,
         pipeline=[
             dict(typename='LoadImageFromFile'),
-            dict(
-                typename='MultiScaleFlipAug',
-                img_scale=(1100, 1650),
-                flip=False,
-                transforms=[
-                    dict(typename='Resize', keep_ratio=True),
-                    dict(typename='Normalize', **img_norm_cfg),
-                    dict(typename='Pad', size_divisor=32, pad_val=0),
-                    dict(typename='ImageToTensor', keys=['img']),
-                    dict(typename='Collect', keys=['img'])
-                ])
+            # 1 order to jit.trace because not support dynamic input size
+            dict(typename='Resize', img_scale=(640, 640), keep_ratio=True),
+            dict(typename='Normalize', **img_norm_cfg),
+            dict(typename='Pad', size=(640, 640), size_divisor=None, pad_val=0),
+            dict(typename='ImageToTensor', keys=['img']),
+            dict(typename='Collect', keys=['img'], meta_keys=('filename', 'ori_filename', 'ori_shape',
+                                                              'img_shape', 'pad_shape', 'scale_factor',
+                                                              'img_norm_cfg'))
+            # 2
+            # dict(
+            #     typename='MultiScaleFlipAug',
+            #     img_scale=(1100, 1650),
+            #     flip=False,
+            #     transforms=[
+            #         dict(typename='Resize', keep_ratio=True),
+            #         dict(typename='Normalize', **img_norm_cfg),
+            #         dict(typename='Pad', size_divisor=32, pad_val=0),
+            #         dict(typename='ImageToTensor', keys=['img']),
+            #         dict(typename='Collect', keys=['img'])
+            #     ])
         ]),
 )
 
@@ -113,7 +122,7 @@ bbox_coder = dict(
 
 ## 3.2 val engine
 val_engine = dict(
-    typename='ValEngine',
+    typename='SingleValEngine',  # ValEngine SingleValEngine
     model=model,
     meshgrid=meshgrid,
     converter=dict(

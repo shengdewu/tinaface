@@ -12,6 +12,7 @@ class EpochBasedLooper(BaseLooper):
         self.mode = mode
         dataloader = self.dataloaders[mode]
         engine = self.engines[mode]
+        engine.train()
         for idx, data in enumerate(dataloader):
             self.hook_pool.fire(f'before_{mode}_iter', self)
             self.cur_results[mode] = engine(data)

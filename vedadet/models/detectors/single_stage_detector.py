@@ -31,19 +31,19 @@ class SingleStageDetector(BaseDetector):
 
         self.bbox_head.init_weights()
 
-    def forward_impl(self, x):
+    def forward(self, x):
         feats = self.backbone(x)
         if self.neck:
             feats = self.neck(feats)
         feats = self.bbox_head(feats)
         return feats
 
-    def forward(self, x, train=True):
-        if train:
-            self.train()
-            feats = self.forward_impl(x)
-        else:
-            self.eval()
-            with torch.no_grad():
-                feats = self.forward_impl(x)
-        return feats
+    # def forward(self, x, train=True):
+    #     if train:
+    #         self.train()
+    #         feats = self.forward_impl(x)
+    #     else:
+    #         self.eval()
+    #         with torch.no_grad():
+    #             feats = self.forward_impl(x)
+    #     return feats

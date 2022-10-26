@@ -204,8 +204,8 @@ class IoUBBoxAnchorConverter(BaseConverter):
             mlvl_scores = torch.cat([mlvl_scores, padding], dim=1)
         mlvl_centerness = mlvl_scores.new_ones(mlvl_scores.shape[0]).detach()
         if revert:
-            flip = img_metas['flip']
-            flip_direction = img_metas['flip_direction']
+            flip = img_metas.get('flip', False)
+            flip_direction = img_metas.get('flip_direction', 'horizontal')
             mlvl_bboxes = bbox_revert(mlvl_bboxes, img_shape, scale_factor,
                                       flip, flip_direction)
 

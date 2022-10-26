@@ -21,7 +21,7 @@ class InferEngine(BaseEngine):
         self.test_cfg = test_cfg
 
     def extract_feats(self, img):
-        feats = self.model(img, train=False)
+        feats = self.model(img)
         return feats
 
     def _get_raw_dets(self, img, img_metas):

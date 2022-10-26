@@ -13,7 +13,7 @@ class TrainEngine(BaseEngine):
         self.optimizer = build_optimizer(self.model, optimizer)
 
     def extract_feats(self, img):
-        feats = self.model(img, train=True)
+        feats = self.model(img)
         return feats
 
     def forward(self, data):
